@@ -10,29 +10,26 @@ use iron::prelude::Chain;
 use iron::Iron;
 use logger::Logger;
 use router::Router;
-use uuid::Uuid;
 
 fn main() {
     env_logger::init();
     let (logger_before, logger_after) = Logger::new(None);
 
     let mut db = Database::new();
-    let p = Post::new(
-        "The First Post",
-        "This is the first post in our API",
-        "Tensor",
-        chrono::offset::Utc::now(),
-        Uuid::new_v4(),
-    );
+    let p = PostInput {
+        title: "The First Post".to_string(),
+        body: "This is the first post in our API".to_string(),
+        author: "Tensor".to_string(),
+    };
+
     db.add_post(p);
 
-    let p2 = Post::new(
-        "The next post is better",
-        "Iron is really cool and Rust is awesome too!",
-        "Metalman",
-        chrono::offset::Utc::now(),
-        Uuid::new_v4(),
-    );
+    let p2 = PostInput {
+        title: "The next post is better".to_string(),
+        body: "Iron is really cool and Rust is awesome too!".to_string(),
+        author: "Metalman".to_string(),
+    };
+
     db.add_post(p2);
 
     let handlers = Handlers::new(db);
@@ -48,5 +45,5 @@ fn main() {
     chain.link_after(json_content_middleware);
     chain.link_after(logger_after);
 
-    Iron::new(chain).http("localhost:8000");
+    Iron::new(chain).http("localhost:8000").unwrap();
 }

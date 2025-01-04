@@ -4,7 +4,6 @@ use crate::models::Post;
 use iron::headers::ContentType;
 use iron::{status, AfterMiddleware, Handler, IronResult, Request, Response};
 use router::Router;
-use std::error::Error;
 use std::io::Read;
 use std::sync::{Arc, Mutex};
 use uuid::Uuid;
@@ -13,18 +12,13 @@ macro_rules! try_handler {
     ($e:expr) => {
         match $e {
             Ok(x) => x,
-            Err(e) => {
-                return Ok(Response::with((
-                    status::InternalServerError,
-                    e.description(),
-                )))
-            }
+            Err(e) => return Ok(Response::with((status::InternalServerError, e.to_string()))),
         }
     };
     ($e:expr, $error:expr) => {
         match $e {
             Ok(x) => x,
-            Err(e) => return Ok(Response::with(($error, e.description()))),
+            Err(e) => return Ok(Response::with(($error, e.to_string()))),
         }
     };
 }
@@ -98,8 +92,12 @@ impl Handler for PostPostHandler {
 
         let post = try_handler!(serde_json::from_str(payload.as_str()), status::BadRequest);
 
-        lock!(self.database).add_post(post);
-        Ok(Response::with((status::Created, payload)))
+        let post: Post = lock!(self.database).add_post(post);
+
+        Ok(Response::with((
+            status::Created,
+            serde_json::to_string(&post).unwrap(),
+        )))
     }
 }
 

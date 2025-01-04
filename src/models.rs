@@ -13,17 +13,24 @@ pub struct Post {
 }
 
 impl Post {
-    pub fn new(title: &str, body: &str, author: &str, datetime: DateTime<Utc>, uuid: Uuid) -> Post {
+    pub fn new(title: &str, body: &str, author: &str) -> Post {
         Post {
             title: title.to_string(),
             body: body.to_string(),
             author: author.to_string(),
-            datetime,
-            uuid,
+            datetime: chrono::offset::Utc::now(),
+            uuid: Uuid::new_v4(),
         }
     }
 
     pub fn uuid(&self) -> &Uuid {
         &self.uuid
     }
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct PostInput {
+    pub title: String,
+    pub body: String,
+    pub author: String,
 }

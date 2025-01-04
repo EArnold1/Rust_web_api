@@ -1,4 +1,4 @@
-use crate::models::Post;
+use crate::{models::Post, PostInput};
 
 #[derive(Clone, Debug)]
 pub struct Database {
@@ -10,8 +10,16 @@ impl Database {
         Database { posts: vec![] }
     }
 
-    pub fn add_post(&mut self, post: Post) {
-        self.posts.push(post);
+    pub fn add_post(&mut self, input: PostInput) -> Post {
+        let post = Post::new(
+            input.title.as_str(),
+            input.body.as_str(),
+            input.author.as_str(),
+        );
+
+        self.posts.push(post.clone());
+
+        post
     }
 
     pub fn posts(&self) -> &Vec<Post> {
