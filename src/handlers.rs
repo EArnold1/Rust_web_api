@@ -45,6 +45,7 @@ pub struct Handlers {
     pub post_feed: PostFeedHandler,
     pub post_post: PostPostHandler,
     pub post: PostHandler,
+    pub multi_post: MultiPostHandler,
 }
 
 impl Handlers {
@@ -54,6 +55,7 @@ impl Handlers {
             post_feed: PostFeedHandler::new(database.clone()),
             post_post: PostPostHandler::new(database.clone()),
             post: PostHandler::new(database.clone()),
+            multi_post: MultiPostHandler::new(database.clone()),
         }
     }
 }
@@ -129,6 +131,32 @@ impl Handler for PostHandler {
         } else {
             Ok(Response::with(status::NotFound))
         }
+    }
+}
+
+pub struct MultiPostHandler {
+    database: Arc<Mutex<Database>>,
+}
+
+impl MultiPostHandler {
+    fn new(database: Arc<Mutex<Database>>) -> MultiPostHandler {
+        MultiPostHandler { database }
+    }
+}
+
+impl Handler for MultiPostHandler {
+    fn handle(&self, req: &mut Request) -> IronResult<Response> {
+        let mut payload = String::new();
+        try_handler!(req.body.read_to_string(&mut payload));
+
+        let posts = try_handler!(serde_json::from_str(payload.as_str()), status::BadRequest);
+
+        let posts: Vec<Post> = lock!(self.database).add_multi_post(posts);
+
+        Ok(Response::with((
+            status::Created,
+            serde_json::to_string(&posts).unwrap(),
+        )))
     }
 }
 

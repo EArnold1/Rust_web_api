@@ -39,6 +39,7 @@ fn main() {
     router.get("/post_feed", handlers.post_feed, "post_feed");
     router.post("/post", handlers.post_post, "post_post");
     router.get("/post/:id", handlers.post, "post");
+    router.post("/post/multi", handlers.multi_post, "multi_post");
 
     let mut chain = Chain::new(router);
     chain.link_before(logger_before);

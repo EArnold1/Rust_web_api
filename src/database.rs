@@ -22,6 +22,23 @@ impl Database {
         post
     }
 
+    pub fn add_multi_post(&mut self, input: Vec<PostInput>) -> Vec<Post> {
+        let mut list = Vec::new();
+
+        for i in 0..input.len() {
+            let post = Post::new(
+                input[i].title.as_str(),
+                input[i].body.as_str(),
+                input[i].author.as_str(),
+            );
+
+            self.posts.push(post.clone());
+            list.push(post);
+        }
+
+        list
+    }
+
     pub fn posts(&self) -> &Vec<Post> {
         &self.posts
     }
